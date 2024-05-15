@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mina kurser</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <nav>
+        <a href="/">Visa kurser</a>
+        <a href="/add-course">Lägg till kurs</a>
+        <a href="/about">Om</a>
+    </nav>
+    <h1>Mina kurser</h1>
+    <ul>
+        <% courses.forEach(course => { %>
+            <li>
+                <h3><%= course.coursecode %> - <%= course.coursename %></h3>
+                <p>Progression: <%= course.progression %></p>
+                <a href="<%= course.syllabus %>" target="_blank">Kursplan</a>
+            </li>
+        <% }); %>
+    </ul>
+</body>
+</html>
