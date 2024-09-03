@@ -24,6 +24,43 @@ app.set("view engine", "ejs");
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 
+// Hantera GET-förfrågan för startsidan
+app.get("/", (req, res) => {
+  db.query("SELECT * FROM courses", (error, results) => {
+    if (error) {
+      console.error("Fel vid hämtning av kurser:", error);
+      res.status(500).send("Ett fel inträffade vid hämtning av kurser.");
+      return;
+    }
+    res.render("index", { courses: results });
+  });
+});
+
+// Hanterar GET-förfrågan för att lägga till en ny kurs
+app.get("/add-course", (req, res) => {
+  res.render("add-course");
+});
+
+// Hanterar POST-förfrågan för att lägga till en ny kurs
+app.post("/add-course", (req, res) => {
+  const { coursecode, coursename, progression, syllabus } = req.body;
+  const sql = 'INSERT INTO courses (coursecode, coursename, progression, syllabus) VALUES (?, ?, ?, ?)';
+
+  db.query(sql, [coursecode, coursename, progression, syllabus], (error, result) => {
+    if (error) {
+      console.error("Fel vid tillägg av kurs:", error);
+      res.status(500).send("Ett fel inträffade vid tillägg av kurs.");
+      return;
+    }
+    res.redirect('/'); // Omledning till startsidan efter tillägg
+  });
+});
+
+// Hanterar GET-förfrågan för "om oss" sidan
+app.get("/about", (req, res) => {
+  res.render("about");
+});
+
 // Startar servern
 app.listen(port, () => {
   console.log(`Servern lyssnar på port ${port}`);
