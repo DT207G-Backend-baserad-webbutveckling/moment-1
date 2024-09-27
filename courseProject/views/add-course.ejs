@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lägg till kurs</title>
-  <link rel="stylesheet" href="/style.css"> </head>
+<link rel="stylesheet" type="text/css" href="/assets/style.css"> </head>
 <body>
   <nav>
     <a href="/">Visa kurser</a>
@@ -13,18 +13,24 @@
   </nav>
   <h1>Lägg till kurs</h1>
 
+<% if (typeof error !== 'undefined') { %>
+    <div class="error-message">
+      <%= error %>
+    </div>
+  <% } %>
+
   <form action="/add-course" method="POST"> 
     <label for="coursecode">Kurskod:</label><br>
-    <input type="text" id="coursecode" name="coursecode" required><br>
+    <input type="text" id="coursecode" name="coursecode" value="<%= typeof formData !== 'undefined' ? formData.coursecode : '' %>" required><br>
 
     <label for="coursename">Kursnamn:</label><br>
-    <input type="text" id="coursename" name="coursename" required><br>
+    <input type="text" id="coursename" name="coursename" value="<%= typeof formData !== 'undefined' ? formData.coursename : '' %>" required><br>
 
     <label for="progression">Progression:</label><br>
-    <input type="text" id="progression" name="progression" required><br>
+    <input type="text" id="progression" name="progression" value="<%= typeof formData !== 'undefined' ? formData.progression : '' %>" required><br>
 
     <label for="syllabus">Kursplan (URL):</label><br>
-    <input type="text" id="syllabus" name="syllabus" required><br>
+    <input type="text" id="syllabus" name="syllabus" value="<%= typeof formData !== 'undefined' ? formData.syllabus : '' %>" required><br>
 
     <button type="submit">Lägg till</button>
   </form> 

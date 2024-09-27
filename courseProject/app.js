@@ -9,6 +9,7 @@ const db = mysql.createConnection({
   user: "root",
   password: "",
   database: "cv",
+  port: "3308"
 });
 
 // Anslut till databasen
@@ -21,7 +22,13 @@ db.connect((error) => {
 });
 
 app.set("view engine", "ejs");
-app.use(express.static("public"));
+app.use(express.static('/public', {
+  setHeaders: (res, path, stat) => {
+    if (path.endsWith('.css')) {
+      res.set('Content-Type', 'text/css');
+    }
+  }
+}));
 app.use(express.urlencoded({ extended: true }));
 
 // Hantera GET-förfrågan för startsidan
@@ -44,15 +51,26 @@ app.get("/add-course", (req, res) => {
 // Hanterar POST-förfrågan för att lägga till en ny kurs
 app.post("/add-course", (req, res) => {
   const { coursecode, coursename, progression, syllabus } = req.body;
+
+    // Validera att alla fält är ifyllda
+    if (!coursecode || !coursename || !progression || !syllabus) {
+      return res.render("add-course", {
+        error: "Alla fält måste fyllas i",
+        formData: req.body // Skicka tillbaka den inmatade datan
+      });
+    }
+
   const sql = 'INSERT INTO courses (coursecode, coursename, progression, syllabus) VALUES (?, ?, ?, ?)';
 
   db.query(sql, [coursecode, coursename, progression, syllabus], (error, result) => {
     if (error) {
       console.error("Fel vid tillägg av kurs:", error);
-      res.status(500).send("Ett fel inträffade vid tillägg av kurs.");
-      return;
+      return res.render("add-course", {
+        error: "Ett fel inträffade vid tillägg av kurs",
+        formData: req.body
+      });
     }
-    res.redirect('/'); // Omledning till startsidan efter tillägg
+    res.redirect('/'); // Omledning till startsidan efter lyckat tillägg
   });
 });
 
