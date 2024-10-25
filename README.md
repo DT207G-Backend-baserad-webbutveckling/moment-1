@@ -29,7 +29,7 @@ För att köra detta projekt behöver du ha följande installerat:
 
 1. Klona detta repository:
 ```bash
-git clone [repository-url]
+git clone https://github.com/DT207G-Backend-baserad-webbutveckling/moment-1
 ```
 
 2. Installera beroenden:
