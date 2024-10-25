@@ -4,35 +4,74 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lägg till kurs</title>
-<link rel="stylesheet" type="text/css" href="/assets/style.css"> </head>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/main.js" defer></script>
+</head>
 <body>
   <nav>
     <a href="/">Visa kurser</a>
     <a href="/add-course">Lägg till kurs</a>
     <a href="/about">Om</a>
   </nav>
+
   <h1>Lägg till kurs</h1>
 
-<% if (typeof error !== 'undefined') { %>
-    <div class="error-message">
-      <%= error %>
-    </div>
+  <% if (error) { %>
+    <div class="alert alert-error"><%= error %></div>
   <% } %>
 
-  <form action="/add-course" method="POST"> 
-    <label for="coursecode">Kurskod:</label><br>
-    <input type="text" id="coursecode" name="coursecode" value="<%= typeof formData !== 'undefined' ? formData.coursecode : '' %>" required><br>
+  <div class="form-container">
+    <form action="/add-course" method="POST" id="addCourseForm">
+      <div class="form-group">
+        <label for="coursecode">Kurskod</label>
+        <input 
+          type="text" 
+          id="coursecode" 
+          name="coursecode" 
+          value="<%= locals.formData ? formData.coursecode : '' %>"
+          required
+        >
+      </div>
+      
+      <div class="form-group">
+        <label for="coursename">Kursnamn</label>
+        <input 
+          type="text" 
+          id="coursename" 
+          name="coursename" 
+          value="<%= locals.formData ? formData.coursename : '' %>"
+          required
+        >
+      </div>
+      
+      <div class="form-group">
+        <label for="progression">Progression</label>
+        <select id="progression" name="progression" required>
+          <option value="" disabled selected>Välj progression</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+          <option value="D">D</option>
+          <option value="E">E</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="syllabus">Kursplan (URL)</label>
+        <input 
+          type="url" 
+          id="syllabus" 
+          name="syllabus" 
+          value="<%= locals.formData ? formData.syllabus : '' %>"
+          required
+        >
+      </div>
 
-    <label for="coursename">Kursnamn:</label><br>
-    <input type="text" id="coursename" name="coursename" value="<%= typeof formData !== 'undefined' ? formData.coursename : '' %>" required><br>
-
-    <label for="progression">Progression:</label><br>
-    <input type="text" id="progression" name="progression" value="<%= typeof formData !== 'undefined' ? formData.progression : '' %>" required><br>
-
-    <label for="syllabus">Kursplan (URL):</label><br>
-    <input type="text" id="syllabus" name="syllabus" value="<%= typeof formData !== 'undefined' ? formData.syllabus : '' %>" required><br>
-
-    <button type="submit">Lägg till</button>
-  </form> 
+      <div class="form-buttons">
+        <button type="submit">Lägg till kurs</button>
+        <button type="button" onclick="window.location.href='/'">Avbryt</button>
+      </div>
+    </form>
+  </div>
 </body>
 </html>

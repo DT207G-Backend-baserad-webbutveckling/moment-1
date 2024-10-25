@@ -1,26 +1,51 @@
 <!DOCTYPE html>
 <html lang="sv">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mina kurser</title>
-    <link rel="stylesheet" href="/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mina kurser</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/main.js" defer></script>
 </head>
 <body>
-    <nav>
-        <a href="/">Visa kurser</a>
-        <a href="/add-course">Lägg till kurs</a>
-        <a href="/about">Om</a>
-    </nav>
-    <h1>Mina kurser</h1>
-    <ul>
-        <% courses.forEach(course => { %>
-            <li>
-                <h3><%= course.coursecode %> - <%= course.coursename %></h3>
-                <p>Progression: <%= course.progression %></p>
+  <nav>
+    <a href="/">Visa kurser</a>
+    <a href="/add-course">Lägg till kurs</a>
+    <a href="/about">Om</a>
+  </nav>
+
+  <!-- Flash messages -->
+  <% if(success_msg && success_msg.length> 0) { %>
+    <div class="alert alert-success">
+      <%= success_msg %>
+    </div>
+    <% } %>
+      <% if(error_msg && error_msg.length> 0) { %>
+        <div class="alert alert-error">
+          <%= error_msg %>
+        </div>
+        <% } %>
+
+          <h1>Mina kurser</h1>
+          <ul class="course-list">
+            <% courses.forEach(course=> { %>
+              <li class="course-item">
+                <h3>
+                  <%= course.coursecode %> - <%= course.coursename %>
+                </h3>
+                <p>Progression: <%= course.progression %>
+                </p>
                 <a href="<%= course.syllabus %>" target="_blank">Kursplan</a>
-            </li>
-        <% }); %>
-    </ul>
+
+                <!-- Form för att radera kurs med bekräftelsedialog -->
+                <form action="/delete-course/<%= course.id %>" method="POST" style="display:inline;"
+                  onsubmit="return confirmDelete()">
+                  <button type="submit" class="delete-button">Radera</button>
+                </form>
+              </li>
+              <% }); %>
+          </ul>
 </body>
+
 </html>

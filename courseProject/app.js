@@ -1,8 +1,27 @@
 const express = require("express");
 const mysql = require("mysql");
+const session = require('express-session');
+const flash = require('connect-flash');
+const path = require('path');
 
 const app = express();
 const port = process.env.PORT || 3006;
+
+// Grundläggande session setup
+app.use(session({
+  secret: 'secret',
+  resave: false,
+  saveUninitialized: true
+}));
+
+app.use(flash());
+
+// Gör flash messages tillgängliga
+app.use((req, res, next) => {
+  res.locals.success_msg = req.flash('success_msg');
+  res.locals.error_msg = req.flash('error_msg');
+  next();
+});
 
 const db = mysql.createConnection({
   host: "localhost",
@@ -12,86 +31,81 @@ const db = mysql.createConnection({
   port: "3308"
 });
 
-// Anslut till databasen
 db.connect((error) => {
   if (error) {
     console.error("Fel vid anslutning till databasen:", error);
-    return; 
+    return;
   }
-  console.log("Ansluten till databasen!"); 
+  console.log("Ansluten till databasen!");
 });
 
 app.set("view engine", "ejs");
-app.use(express.static('/public', {
-  setHeaders: (res, path, stat) => {
-    if (path.endsWith('.css')) {
-      res.set('Content-Type', 'text/css');
-    }
-  }
-}));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 
-// Hantera GET-förfrågan för startsidan
+// Visa alla kurser
 app.get("/", (req, res) => {
   db.query("SELECT * FROM courses", (error, results) => {
     if (error) {
-      console.error("Fel vid hämtning av kurser:", error);
-      res.status(500).send("Ett fel inträffade vid hämtning av kurser.");
+      req.flash('error_msg', 'Ett fel inträffade vid hämtning av kurser.');
+      res.redirect('/');
       return;
     }
-    res.render("index", { courses: results });
+    res.render("index", { 
+      courses: results,
+      success_msg: req.flash('success_msg'),
+      error_msg: req.flash('error_msg')
+    });
   });
 });
 
-// Hanterar GET-förfrågan för att lägga till en ny kurs
+// Visa lägg till kurs-sidan
 app.get("/add-course", (req, res) => {
-  res.render("add-course");
+  res.render("add-course", { 
+    error: null,
+    formData: {}
+  });
 });
 
-// Hanterar POST-förfrågan för att lägga till en ny kurs
+// Lägg till kurs
 app.post("/add-course", (req, res) => {
   const { coursecode, coursename, progression, syllabus } = req.body;
 
-    // Validera att alla fält är ifyllda
-    if (!coursecode || !coursename || !progression || !syllabus) {
-      return res.render("add-course", {
-        error: "Alla fält måste fyllas i",
-        formData: req.body // Skicka tillbaka den inmatade datan
-      });
-    }
+  if (!coursecode || !coursename || !progression || !syllabus) {
+    return res.render("add-course", {
+      error: "Alla fält måste fyllas i",
+      formData: req.body
+    });
+  }
 
   const sql = 'INSERT INTO courses (coursecode, coursename, progression, syllabus) VALUES (?, ?, ?, ?)';
-
-  db.query(sql, [coursecode, coursename, progression, syllabus], (error, result) => {
+  db.query(sql, [coursecode, coursename, progression, syllabus], (error) => {
     if (error) {
-      console.error("Fel vid tillägg av kurs:", error);
-      return res.render("add-course", {
-        error: "Ett fel inträffade vid tillägg av kurs",
-        formData: req.body
-      });
+      req.flash('error_msg', 'Ett fel inträffade vid tillägg av kurs');
+      return res.redirect('/add-course');
     }
-    res.redirect('/'); // Omledning till startsidan efter lyckat tillägg
+    req.flash('success_msg', 'Kursen har lagts till!');
+    res.redirect('/');
   });
 });
 
-// Hanterar GET-förfrågan för "om oss" sidan
+// Ta bort kurs
+app.post("/delete-course/:id", (req, res) => {
+  const sql = "DELETE FROM courses WHERE id = ?";
+  db.query(sql, [req.params.id], (error) => {
+    if (error) {
+      req.flash('error_msg', 'Ett fel inträffade vid borttagning av kurs');
+    } else {
+      req.flash('success_msg', 'Kursen har tagits bort!');
+    }
+    res.redirect("/");
+  });
+});
+
 app.get("/about", (req, res) => {
   res.render("about");
 });
 
-// Startar servern
 app.listen(port, () => {
   console.log(`Servern lyssnar på port ${port}`);
-});
-
-process.on('SIGINT', () => {
-    console.log('Mottog SIGINT. Stänger ner på ett ordnat sätt...');
-    db.end(() => {
-      console.log('Databasanslutningar stängda.');
-      // Stänger servern
-      server.close(() => { 
-        console.log('Servern stängd.');
-        process.exit(0); 
-      });
-    });
 });
