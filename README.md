@@ -1,23 +1,23 @@
-# 📚 Kurshanteringssystem
+# Kurshanteringssystem
 
 Ett enkelt och användarvänligt system för att hantera kursinformation, byggt med Node.js, Express och MySQL.
 
-## ✨ Funktioner
+## Funktioner
 
-- 📝 Lista alla kurser
-- ➕ Lägg till nya kurser
-- 🗑️ Ta bort befintliga kurser
-- 🔍 Visa detaljerad kursinformation
-- 📱 Responsiv design som fungerar på alla enheter
+- Lista alla kurser
+- Lägg till nya kurser
+- Ta bort befintliga kurser
+- Visa detaljerad kursinformation
+- Responsiv design som fungerar på alla enheter
 
-## 🛠️ Teknisk Stack
+## Teknisk stack
 
 - **Backend**: Node.js med Express
 - **Databas**: MySQL
 - **Frontend**: EJS (Embedded JavaScript templates)
 - **Styling**: CSS med responsiv design
 
-## 📋 Förutsättningar
+## Förutsättningar
 
 För att köra detta projekt behöver du ha följande installerat:
 
@@ -25,7 +25,7 @@ För att köra detta projekt behöver du ha följande installerat:
 - MySQL Server (konfigurerad på port 3308)
 - npm (Node Package Manager)
 
-## 🚀 Installation
+## Installation
 
 1. Klona detta repository:
 ```bash
@@ -34,7 +34,7 @@ git clone https://github.com/DT207G-Backend-baserad-webbutveckling/moment-1
 
 2. Installera beroenden:
 ```bash
-cd [projekt-mapp]
+cd moment-1/courseProject
 npm install
 ```
 
@@ -49,18 +49,18 @@ CREATE TABLE courses (
 );
 ```
 
-4. Uppdatera databasanslutningen i `app.js` om nödvändigt:
-```javascript
-const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "cv",
-  port: "3308"
-});
+4. Skapa en `.env`-fil i `courseProject` utifrån `.env.example` och ange dina lokala databasvärden:
+```env
+PORT=3006
+SESSION_SECRET=valfri-lokal-hemlighet
+DB_HOST=localhost
+DB_PORT=3308
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=cv
 ```
 
-## 🎯 Användning
+## Användning
 
 1. Starta applikationen:
 ```bash
@@ -111,7 +111,50 @@ http://localhost:3006
 ## 📱 Responsiv Design
 
 Applikationen är fullständigt responsiv och optimerad för:
-- 📱 Mobiltelefoner
-- 📱 Tablets
-- 💻 Laptops
-- 🖥️ Skrivbordsskärmar
+- Mobiltelefoner
+- Tablets
+- Laptops
+- Skrivbordsskärmar
+
+## Render-deploy
+
+Projektet är nu förberett för Render med:
+
+- `process.env.PORT` och bindning till `0.0.0.0`
+- miljövariabler för databas och sessionshemlighet
+- `npm start` som startkommando
+- `render.yaml` i repo-roten med `rootDir: courseProject`
+- `healthCheckPath: /healthz`
+
+### Rekommenderade miljövariabler på Render
+
+Ange dessa i Render om du inte använder Blueprint-prompten:
+
+```env
+DB_HOST=your-mysql-host
+DB_PORT=3306
+DB_USER=your-mysql-user
+DB_PASSWORD=your-mysql-password
+DB_NAME=your-mysql-database
+```
+
+`SESSION_SECRET` ska vara ett eget långt slumpmässigt värde och inte samma som databaslösenordet.
+
+### Skapa tjänsten
+
+1. Pusha projektet till GitHub.
+2. Skapa en Render `Web Service`.
+3. Använd repo-roten som Blueprint-källa eller sätt `Root Directory` till `courseProject`.
+4. Om du skapar tjänsten manuellt:
+
+```text
+Runtime: Node
+Build Command: npm install
+Start Command: npm start
+```
+
+5. Lägg in miljövariablerna ovan.
+
+### Viktigt om databasen
+
+Om `studentmysql.miun.se` endast tillåter anslutningar från MIUN-nät eller en IP-lista kommer Render inte kunna ansluta förrän Render-tjänstens utgående IP-intervall tillåts. Render visar dessa under tjänstens `Connect`-meny i Dashboard.

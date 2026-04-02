@@ -1,15 +1,25 @@
+require("dotenv").config();
+
 const express = require("express");
 const mysql = require("mysql2");
-const session = require('express-session');
-const flash = require('connect-flash');
-const path = require('path');
+const session = require("express-session");
+const flash = require("connect-flash");
+const path = require("path");
 
 const app = express();
 const port = process.env.PORT || 3006;
+const sessionSecret = process.env.SESSION_SECRET || "dev-secret-change-me";
+const dbConfig = {
+  host: process.env.DB_HOST || "localhost",
+  user: process.env.DB_USER || "root",
+  password: process.env.DB_PASSWORD || "",
+  database: process.env.DB_NAME || "cv",
+  port: Number(process.env.DB_PORT) || 3308,
+};
 
 // Grundläggande session setup
 app.use(session({
-  secret: 'secret',
+  secret: sessionSecret,
   resave: false,
   saveUninitialized: true
 }));
@@ -23,20 +33,16 @@ app.use((req, res, next) => {
   next();
 });
 
-const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "cv",
-  port: "3308"
-});
+const db = mysql.createConnection(dbConfig);
 
 db.connect((error) => {
   if (error) {
     console.error("Fel vid anslutning till databasen:", error);
     return;
   }
-  console.log("Ansluten till databasen!");
+  console.log(
+    `Ansluten till databasen ${dbConfig.database} på ${dbConfig.host}:${dbConfig.port}!`
+  );
 });
 
 app.set("view engine", "ejs");
@@ -47,14 +53,16 @@ app.use(express.urlencoded({ extended: true }));
 app.get("/", (req, res) => {
   db.query("SELECT * FROM courses", (error, results) => {
     if (error) {
-      req.flash('error_msg', 'Ett fel inträffade vid hämtning av kurser.');
-      res.redirect('/');
-      return;
+      return res.status(500).render("index", {
+        courses: [],
+        success_msg: req.flash("success_msg"),
+        error_msg: "Ett fel inträffade vid hämtning av kurser.",
+      });
     }
     res.render("index", { 
       courses: results,
-      success_msg: req.flash('success_msg'),
-      error_msg: req.flash('error_msg')
+      success_msg: req.flash("success_msg"),
+      error_msg: req.flash("error_msg")
     });
   });
 });
@@ -106,6 +114,10 @@ app.get("/about", (req, res) => {
   res.render("about");
 });
 
-app.listen(port, () => {
+app.get("/healthz", (_req, res) => {
+  res.status(200).send("ok");
+});
+
+app.listen(port, "0.0.0.0", () => {
   console.log(`Servern lyssnar på port ${port}`);
 });
