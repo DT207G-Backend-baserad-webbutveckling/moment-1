@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: moment-1-api
+    env: node
+    plan: free
+    repo: https://github.com/DT207G-Backend-baserad-webbutveckling/moment-1
+    branch: main
+    buildCommand: "npm ci"
+    startCommand: "npm start"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Example secrets (set actual values on Render dashboard or reference secrets)
+      # - key: DATABASE_URL
+      #   value: ${{ DATABASE_URL }}
+      # - key: SESSION_SECRET
+      #   value: ${{ SESSION_SECRET }}
