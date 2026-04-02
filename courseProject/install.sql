@@ -1,9 +1,3 @@
--- Skapa databasen om den inte redan finns
-CREATE DATABASE IF NOT EXISTS cv;
-
--- Använd databasen
-USE cv;
-
 -- Skapa tabellen 'courses' om den inte redan finns
 CREATE TABLE IF NOT EXISTS courses (
     id INT AUTO_INCREMENT PRIMARY KEY,
