@@ -3,6 +3,7 @@ const mysql = require("mysql2");
 const session = require('express-session');
 const flash = require('connect-flash');
 const path = require('path');
+require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3006;
@@ -24,11 +25,11 @@ app.use((req, res, next) => {
 });
 
 const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "cv",
-  port: "3308"
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT
 });
 
 db.connect((error) => {
@@ -51,7 +52,7 @@ app.get("/", (req, res) => {
       res.redirect('/');
       return;
     }
-    res.render("index", { 
+    res.render("index", {
       courses: results,
       success_msg: req.flash('success_msg'),
       error_msg: req.flash('error_msg')
@@ -61,7 +62,7 @@ app.get("/", (req, res) => {
 
 // Visa lägg till kurs-sidan
 app.get("/add-course", (req, res) => {
-  res.render("add-course", { 
+  res.render("add-course", {
     error: null,
     formData: {}
   });
