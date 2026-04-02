@@ -149,10 +149,21 @@ nav a:hover {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+p {
+  margin: 10px auto;
+  width: 50%;
+  margin: 10px 0;
+  color: #333;
+  font-size: 1rem;
+  line-height: 1.6;
+  letter-spacing: 0.5px;
 }
 
 /* delete-button klass */
@@ -167,11 +178,11 @@ nav a:hover {
     display: block;
     margin: 5px 0;
   }
-  
+
   .course-item {
     width: 100%;
   }
-  
+
   .form-container {
     width: 95%;
   }
@@ -181,7 +192,7 @@ nav a:hover {
   .course-item {
     width: calc(33.333% - 20px);
   }
-  
+
   .form-container {
     width: 60%;
   }
