@@ -2,13 +2,14 @@ require("dotenv").config();
 
 const express = require("express");
 const mysql = require("mysql2");
-const session = require("express-session");
+const cookieSession = require("cookie-session");
 const flash = require("connect-flash");
 const path = require("path");
 
 const app = express();
 const port = process.env.PORT || 3006;
 const sessionSecret = process.env.SESSION_SECRET || "dev-secret-change-me";
+const isProduction = process.env.NODE_ENV === "production";
 const dbConfig = {
   host: process.env.DB_HOST || "localhost",
   user: process.env.DB_USER || "root",
@@ -17,11 +18,17 @@ const dbConfig = {
   port: Number(process.env.DB_PORT) || 3308,
 };
 
-// Grundläggande session setup
-app.use(session({
-  secret: sessionSecret,
-  resave: false,
-  saveUninitialized: true
+if (isProduction) {
+  app.set("trust proxy", 1);
+}
+
+app.use(cookieSession({
+  name: "session",
+  keys: [sessionSecret],
+  maxAge: 24 * 60 * 60 * 1000,
+  httpOnly: true,
+  sameSite: "lax",
+  secure: isProduction
 }));
 
 app.use(flash());
@@ -33,13 +40,7 @@ app.use((req, res, next) => {
   next();
 });
 
-const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT
-});
+const db = mysql.createConnection(dbConfig);
 
 db.connect((error) => {
   if (error) {
