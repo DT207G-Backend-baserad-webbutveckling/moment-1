@@ -11,6 +11,7 @@ app.use(cors());
 const port = process.env.PORT || 3006;
 const sessionSecret = process.env.SESSION_SECRET || "dev-secret-change-me";
 const isProduction = process.env.NODE_ENV === "production";
+const formatDbErrorCode = (error) => error?.code || "UNKNOWN_DB_ERROR";
 const dbConfig = {
   host: process.env.DB_HOST || "localhost",
   user: process.env.DB_USER || "root",
@@ -87,8 +88,9 @@ app.use(express.urlencoded({ extended: true }));
 app.get("/", (req, res) => {
   db.query("SELECT * FROM courses", (error, results) => {
     if (error) {
+      const errorCode = formatDbErrorCode(error);
       console.error("Fel vid hamtning av kurser:", {
-        code: error.code,
+        code: errorCode,
         errno: error.errno,
         sqlState: error.sqlState,
         message: error.message,
@@ -96,7 +98,7 @@ app.get("/", (req, res) => {
       return res.status(500).render("index", {
         courses: [],
         success_msg: req.flash("success_msg"),
-        error_msg: "Ett fel inträffade vid hämtning av kurser.",
+        error_msg: `Ett fel inträffade vid hämtning av kurser. Kod: ${errorCode}`,
       });
     }
     res.render("index", {
@@ -168,6 +170,27 @@ app.get("/about", (req, res) => {
 
 app.get("/healthz", (_req, res) => {
   res.status(200).send("ok");
+});
+
+app.get("/healthz/db", (_req, res) => {
+  db.query("SELECT 1 AS ok", (error) => {
+    if (error) {
+      const errorCode = formatDbErrorCode(error);
+      console.error("DB health check misslyckades:", {
+        code: errorCode,
+        errno: error.errno,
+        sqlState: error.sqlState,
+        message: error.message,
+      });
+      return res.status(500).json({
+        ok: false,
+        code: errorCode,
+        message: error.message,
+      });
+    }
+
+    return res.status(200).json({ ok: true });
+  });
 });
 
 app.listen(port, "0.0.0.0", () => {
