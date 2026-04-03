@@ -1,4 +1,4 @@
-// require("dotenv").config();
+require("dotenv").config();
 const cors = require("cors");
 const express = require("express");
 const mysql = require("mysql2");
@@ -18,6 +18,15 @@ const dbConfig = {
   database: process.env.DB_NAME || "cv",
   port: Number(process.env.DB_PORT) || 3308,
 };
+
+if (!process.env.DB_HOST || !process.env.DB_USER || !process.env.DB_NAME) {
+  console.warn("Databasens miljövariabler är inte fullstandigt satta. Aktiva värden:", {
+    host: dbConfig.host,
+    port: dbConfig.port,
+    user: dbConfig.user,
+    database: dbConfig.database,
+  });
+}
 
 if (isProduction) {
   app.set("trust proxy", 1);
@@ -41,16 +50,33 @@ app.use((req, res, next) => {
   next();
 });
 
-const db = mysql.createConnection(dbConfig);
+const db = mysql.createPool({
+  ...dbConfig,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0,
+});
 
-db.connect((error) => {
+db.getConnection((error, connection) => {
   if (error) {
-    console.error("Fel vid anslutning till databasen:", error);
+    console.error("Fel vid anslutning till databasen:", {
+      code: error.code,
+      errno: error.errno,
+      sqlState: error.sqlState,
+      message: error.message,
+      host: dbConfig.host,
+      port: dbConfig.port,
+      user: dbConfig.user,
+      database: dbConfig.database,
+    });
     return;
   }
   console.log(
     `Ansluten till databasen ${dbConfig.database} på ${dbConfig.host}:${dbConfig.port}!`
   );
+  connection.release();
 });
 
 app.set("view engine", "ejs");
@@ -61,6 +87,12 @@ app.use(express.urlencoded({ extended: true }));
 app.get("/", (req, res) => {
   db.query("SELECT * FROM courses", (error, results) => {
     if (error) {
+      console.error("Fel vid hamtning av kurser:", {
+        code: error.code,
+        errno: error.errno,
+        sqlState: error.sqlState,
+        message: error.message,
+      });
       return res.status(500).render("index", {
         courses: [],
         success_msg: req.flash("success_msg"),
@@ -97,6 +129,12 @@ app.post("/add-course", (req, res) => {
   const sql = 'INSERT INTO courses (coursecode, coursename, progression, syllabus) VALUES (?, ?, ?, ?)';
   db.query(sql, [coursecode, coursename, progression, syllabus], (error) => {
     if (error) {
+      console.error("Fel vid tillagg av kurs:", {
+        code: error.code,
+        errno: error.errno,
+        sqlState: error.sqlState,
+        message: error.message,
+      });
       req.flash('error_msg', 'Ett fel inträffade vid tillägg av kurs');
       return res.redirect('/add-course');
     }
@@ -110,6 +148,12 @@ app.post("/delete-course/:id", (req, res) => {
   const sql = "DELETE FROM courses WHERE id = ?";
   db.query(sql, [req.params.id], (error) => {
     if (error) {
+      console.error("Fel vid borttagning av kurs:", {
+        code: error.code,
+        errno: error.errno,
+        sqlState: error.sqlState,
+        message: error.message,
+      });
       req.flash('error_msg', 'Ett fel inträffade vid borttagning av kurs');
     } else {
       req.flash('success_msg', 'Kursen har tagits bort!');
