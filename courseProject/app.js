@@ -2,16 +2,9 @@ require("dotenv").config();
 
 const express = require("express");
 const mysql = require("mysql2");
-<<<<<<< HEAD
 const session = require("express-session");
 const flash = require("connect-flash");
 const path = require("path");
-=======
-const session = require('express-session');
-const flash = require('connect-flash');
-const path = require('path');
-require('dotenv').config();
->>>>>>> b2ea4b3984954cb147a7911ff25fd65418ab41fa
 
 const app = express();
 const port = process.env.PORT || 3006;
@@ -40,9 +33,6 @@ app.use((req, res, next) => {
   next();
 });
 
-<<<<<<< HEAD
-const db = mysql.createConnection(dbConfig);
-=======
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -50,7 +40,6 @@ const db = mysql.createConnection({
   database: process.env.DB_NAME,
   port: process.env.DB_PORT
 });
->>>>>>> b2ea4b3984954cb147a7911ff25fd65418ab41fa
 
 db.connect((error) => {
   if (error) {
