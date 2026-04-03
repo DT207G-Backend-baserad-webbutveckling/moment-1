@@ -1,5 +1,5 @@
-require("dotenv").config();
-
+// require("dotenv").config();
+const cors = require("cors");
 const express = require("express");
 const mysql = require("mysql2");
 const cookieSession = require("cookie-session");
@@ -7,6 +7,7 @@ const flash = require("connect-flash");
 const path = require("path");
 
 const app = express();
+app.use(cors());
 const port = process.env.PORT || 3006;
 const sessionSecret = process.env.SESSION_SECRET || "dev-secret-change-me";
 const isProduction = process.env.NODE_ENV === "production";
