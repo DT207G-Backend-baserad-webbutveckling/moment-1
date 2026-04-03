@@ -11,7 +11,7 @@
   "license": "ISC",
   "description": "",
   "engines": {
-    "node": ">=20 <23"
+    "node": "v25.8.1"
   },
   "dependencies": {
     "connect-flash": "^0.1.1",
